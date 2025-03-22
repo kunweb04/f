@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>物品编号查询</title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #74ebd5, #ACB6E5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      background-color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+      max-width: 900px;
+      width: 100%;
+      padding: 40px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2.5rem;
+      color: #2c3e50;
+    }
+    #searchBox {
+      width: 100%;
+      padding: 14px 20px;
+      margin-bottom: 30px;
+      border: 1px solid #ddd;
+      border-radius: 50px;
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.3s, box-shadow 0.3s;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    }
+    #searchBox:focus {
+      border-color: #74ebd5;
+      box-shadow: 0 3px 10px rgba(116, 235, 213, 0.4);
+    }
+    .item-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 20px;
+    }
+    .item {
+      background-color: #fefefe;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: transform 0.3s, background-color 0.3s;
+      opacity: 0;
+      animation: fadeIn 0.5s forwards;
+    }
+    @keyframes fadeIn { to { opacity: 1; } }
+    .item:hover {
+      transform: translateY(-5px);
+      background-color: #e8f9f3;
+    }
+    .item-name {
+      font-weight: 500;
+      color: #2c3e50;
+    }
+    .item-number {
+      background-color: #74ebd5;
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 15px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    @media (max-width: 600px) {
+      h1 { font-size: 1.8rem; }
+      #searchBox { font-size: 14px; padding: 12px 16px; }
+      .item { padding: 15px; }
+      .item-number { font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>物品编号查询</h1>
+    <input type="text" id="searchBox" placeholder="搜索物品名称...">
+    <div id="itemList" class="item-list"></div>
+  </div>
+  <script>
+    const items = [
+      { name: '木头', number: 0 },
+      { name: '石头', number: 1 },
+      { name: '铁矿', number: 2 },
+      { name: '金矿', number: 3 },
+      { name: '煤炭', number: 4 },
+      { name: '煤炭', number: 5 },
+      { name: '花', number: 6 },
+      { name: '纤维', number: 7 },
+      { name: '粑粑', number: 8 },
+      { name: '骨头', number: 9 },
+      { name: '粘液', number: 10 },
+      { name: '瓶装萤火虫', number: 11 },
+      { name: '瓶装甲虫', number: 12 },
+      { name: '龙葵', number: 13 },
+      { name: '瓶装蝴蝶', number: 14 },
+      { name: '薰衣草', number: 15 },
+      { name: '水晶', number: 16 },
+      { name: '瓶装死亡飞蛾', number: 17 },
+      { name: '火焰花', number: 18 },
+      { name: '恶魔角', number: 19 },
+      { name: '线', number: 20 },
+      { name: '兽皮', number: 21 },
+      { name: '沙子', number: 22 },
+      { name: '砖块', number: 23 },
+      { name: '铁锭', number: 24 },
+      { name: '金锭', number: 25 },
+      { name: '纸', number: 26 },
+      { name: '皮革', number: 27 },
+      { name: '钢铁', number: 28 },
+      { name: '钢铁', number: 29 },
+      { name: '玻璃', number: 30 },
+      { name: '红宝石', number: 31 },
+      { name: '翡翠', number: 32 },
+      { name: '黄玉', number: 33 },
+      { name: '紫水晶', number: 34 },
+      { name: '瓶装油', number: 35 },
+      { name: '小麦', number: 36 },
+      { name: '面粉', number: 37 },
+      { name: '塑料', number: 38 },
+      { name: '皇家钢铁', number: 39 },
+      { name: '皇家布料', number: 40 },
+      { name: '玻璃纤维', number: 41 },
+      { name: '电子芯片', number: 42 },
+      { name: '嬗变学', number: 43 },
+      { name: '绿色墨水', number: 44 },
+      { name: '紫色墨水', number: 45 },
+      { name: '化石', number: 46 },
+      { name: '斯芬克斯', number: 47 },
+      { name: '嘎巴拉碗', number: 48 },
+      { name: '被冰冻的遗物', number: 49 },
+      { name: '锚', number: 50 },
+      { name: '沉没的安卡', number: 51 },
+      { name: '金蛋', number: 52 },
+      { name: '瓶装水', number: 53 },
+      { name: '浆果', number: 54 },
+      { name: '柑橘', number: 55 },
+      { name: '甜菜', number: 56 },
+      { name: '糖', number: 57 },
+      { name: '奶酪', number: 58 },
+      { name: '蛋黄酱', number: 59 },
+      { name: '鸡蛋', number: 60 },
+      { name: '瓶装牛奶', number: 61 },
+      { name: '肉块', number: 62 },
+      { name: '瓶装精灵', number: 63 },
+      { name: '仙人掌果', number: 64 },
+      { name: '辣椒', number: 65 },
+      { name: '南瓜', number: 66 },
+      { name: '鱼', number: 67 },
+      { name: '海带', number: 68 },
+      { name: '面包', number: 69 },
+      { name: '披萨', number: 70 },
+      { name: '饼干', number: 71 },
+      { name: '寿司', number: 72 },
+      { name: '汤', number: 73 },
+      { name: '三明治', number: 74 },
+      { name: '水果沙拉', number: 75 },
+      { name: '冰淇淋', number: 76 },
+      { name: '肉串', number: 77 },
+      { name: '恐龙蛋', number: 78 },
+      { name: '骷髅鱼', number: 79 },
+      { name: '冰冻鱿鱼', number: 80 },
+      { name: '熔岩鳗', number: 81 },
+      { name: '烤鱼', number: 82 },
+      { name: '烤肉', number: 83 },
+      { name: '弓箭', number: 84 },
+      { name: '炸弹', number: 85 },
+      { name: '电磁脉冲手雷', number: 86 },
+      { name: '动物饲料', number: 87 },
+      { name: '治疗药剂', number: 88 },
+      { name: '闪雷', number: 89 },
+      { name: '安娜的最爱', number: 90 },
+      { name: '液态好运', number: 91 },
+      { name: '智慧之水', number: 92 },
+      { name: '曼陀罗', number: 93 },
+      { name: '血怒鸡尾酒', number: 94 },
+      { name: '巨龙神油', number: 95 },
+      { name: '贪心剂', number: 96 },
+      { name: '贤者卷轴', number: 97 },
+      { name: '建造者卷轴', number: 98 },
+      { name: '德鲁伊卷轴', number: 99 },
+      { name: '巫师卷轴', number: 100 },
+      { name: '矿工卷轴', number: 101 },
+      { name: '恶魔卷轴', number: 102 },
+      { name: '树苗', number: 103 },
+      { name: '棉花种子', number: 104 },
+      { name: '甜菜种子', number: 105 },
+      { name: '小麦种子', number: 106 },
+      { name: '辣椒种子', number: 107 },
+      { name: '南瓜籽', number: 108 },
+      { name: '瓶装彩虹', number: 109 },
+      { name: '钥匙', number: 110 },
+      { name: '金币', number: 111 },
+      { name: '瓶子', number: 112 },
+      { name: '机器人', number: 113 },
+      { name: '普通矿镐（等级1）', number: 114 },
+      { name: '黏黏矿镐（等级2）', number: 115 },
+      { name: '骨质矿镐（等级3）', number: 116 },
+      { name: '火焰矿镐（等级4）', number: 117 },
+      { name: '水晶矿镐（等级5）', number: 118 },
+      { name: '恶魔矿镐（等级6）', number: 119 },
+      { name: '铲子（等级1）', number: 120 },
+      { name: '骨剑（等级1）', number: 121 },
+      { name: '金剑（等级2）', number: 122 },
+      { name: '德鲁伊剑（等级3）', number: 123 },
+      { name: '水晶剑（等级4）', number: 124 },
+      { name: '恶魔剑（等级5）', number: 125 },
+      { name: '短弓（等级1）', number: 126 },
+      { name: '骷髅弓（等级2）', number: 127 },
+      { name: '水晶弓（等级3）', number: 128 },
+      { name: '恶魔弓（等级4）', number: 129 },
+      { name: '普通护身符（等级1）', number: 130 },
+      { name: '黏黏护身符（等级2）', number: 131 },
+      { name: '骨制护身符（等级3）', number: 132 },
+      { name: '水晶护身符（等级4）', number: 133 },
+      { name: '恶魔护身符（等级5）', number: 134 },
+      { name: '普通靴子（等级1）', number: 135 },
+      { name: '金属靴子（等级2）', number: 136 },
+      { name: '大师靴子（等级3）', number: 137 },
+      { name: '机械靴子（等级4）', number: 138 },
+      { name: '普通手套（等级1）', number: 139 },
+      { name: '金属手套（等级2）', number: 140 },
+      { name: '大师手套（等级3）', number: 141 },
+      { name: '机械手套（等级4）', number: 142 },
+      { name: '发霉的书（等级1）', number: 143 },
+      { name: '黏黏手册（等级2）', number: 144 },
+      { name: '死灵书（等级3）', number: 145 },
+      { name: '冰川圣典（等级4）', number: 146 },
+      { name: '地狱火符集（等级5）', number: 147 },
+      { name: '普通背包（等级1）', number: 148 },
+      { name: '小型背包（等级2）', number: 149 },
+      { name: '中型背包（等级3）', number: 150 },
+      { name: '大型背包（等级4）', number: 151 },
+      { name: '巨型背包（等级5）', number: 152 },
+      { name: '无底背包（等级6）', number: 153 },
+      { name: '普通钱包（等级1）', number: 154 },
+      { name: '小型钱包（等级2）', number: 155 },
+      { name: '中型钱包（等级3）', number: 156 },
+      { name: '大型钱包（等级4）', number: 157 },
+      { name: '巨型钱包（等级5）', number: 158 },
+      { name: '无底钱包（等级6）', number: 159 },
+      { name: '上古印章（古代墓地）', number: 160 },
+      { name: '骷髅印章（骷髅迷宫）', number: 161 },
+      { name: '冰冻印章（水晶洞窟）', number: 162 },
+      { name: '火焰印章（火焰神庙）', number: 163 },
+      { name: '上古银河印章', number: 164 },
+      { name: '骷髅银河印章', number: 165 },
+      { name: '冰冻银河印章', number: 166 },
+      { name: '火焰银河印章', number: 167 },
+      { name: '博物馆印章', number: 168 },
+      { name: '书呆子眼镜', number: 169 },
+      { name: '礼帽', number: 170 },
+      { name: '粉红蝴蝶结', number: 171 },
+      { name: '灯笼', number: 172 },
+      { name: '骷髅钥匙', number: 173 },
+      { name: '骷髅面具', number: 174 },
+      { name: '精灵光环', number: 175 },
+      { name: '箭筒', number: 176 },
+      { name: '盾', number: 178 },
+      { name: '魔法权杖', number: 179 },
+      { name: '神圣遗物', number: 180 },
+      { name: '雷杖', number: 181 },
+      { name: '冰杖', number: 182 },
+      { name: '火杖', number: 183 },
+      { name: '耐力之瓶（直接增加耐力）', number: 184 },
+      { name: '心之容器（直接加什么上限）', number: 185 },
+      { name: '填充土地（大地碎片）', number: 186 },
+      { name: '水铲（等级2）', number: 187 },
+      { name: '游牧铲（等级3）', number: 188 },
+      { name: '皇家铲（等级4）', number: 189 },
+      { name: '机械铲（等级5）', number: 190 },
+      { name: '巨型头骨', number: 191 },
+      { name: '克服之证（灵能球）', number: 192 },
+      { name: '死灵法杖', number: 193 },
+      { name: '毁灭者（混沌终结者）', number: 194 },
+      { name: '流星法杖（火杖进阶）', number: 195 },
+      { name: '风暴法杖（雷杖进阶）', number: 196 },
+      { name: '暴雪法杖（冰杖进阶）', number: 197 },
+      { name: '死亡法杖（死灵法杖进阶）', number: 198 },
+      { name: '栅栏', number: 199 },
+      { name: '门', number: 200 },
+      { name: '床', number: 201 },
+      { name: '火把', number: 202 },
+      { name: '凳子', number: 203 },
+      { name: '王座', number: 204 },
+      { name: '精灵雕像', number: 205 },
+      { name: '甜菜雕像', number: 206 },
+      { name: '展示架', number: 207 },
+      { name: '花盆', number: 208 },
+      { name: '路', number: 209 },
+      { name: '黑曜石', number: 210 },
+      { name: '星之碎片', number: 211 },
+      { name: '虚空石', number: 212 },
+      { name: '传奇宝石', number: 213 },
+      { name: '虚空钢', number: 214 },
+      { name: '宇宙钢', number: 215 },
+      { name: '虚空玫瑰', number: 216 },
+      { name: '克拉肯之眼', number: 217 },
+      { name: '动物诱饵', number: 218 },
+      { name: '虚空传送门', number: 219 },
+      { name: '蓝色染料', number: 220 },
+      { name: '鸭绿色染料', number: 221 },
+      { name: '黄绿色染料', number: 222 },
+      { name: '绿色染料', number: 223 },
+      { name: '黄色染料', number: 224 },
+      { name: '橙色染料', number: 225 },
+      { name: '红色染料', number: 226 },
+      { name: '粉色染料', number: 227 },
+      { name: '紫色染料', number: 228 },
+      { name: '灰色染料', number: 229 },
+      { name: '黑色染料', number: 230 },
+      { name: '褪色工具', number: 231 },
+      { name: '修理工具', number: 232 },
+      { name: '浆果种子', number: 233 },
+      { name: '尖刺陷阱', number: 234 },
+      { name: '铁轨', number: 235 },
+      { name: '火车头', number: 236 },
+      { name: '黏黏印章', number: 237 },
+      { name: '白骨印章', number: 238 },
+      { name: '火焰印章', number: 239 },
+      { name: '甜菜印章', number: 240 },
+      { name: '星星印章', number: 241 },
+      { name: '破坏者印章', number: 242 },
+      { name: '训练假人', number: 243 },
+      { name: '告示牌', number: 244 },
+      { name: '星星卷轴', number: 245 },
+      { name: '石地板', number: 246 },
+      { name: '石门', number: 247 },
+      { name: '石头墙', number: 248 },
+      { name: '铁地板', number: 249 },
+      { name: '铁门', number: 250 },
+      { name: '铁墙', number: 251 },
+      { name: '黏黏地板', number: 252 },
+      { name: '黏黏门', number: 253 },
+      { name: '黏黏墙', number: 254 },
+      { name: '砖地板', number: 255 },
+      { name: '砖门', number: 256 },
+      { name: '砖墙', number: 257 },
+      { name: '玻璃地板', number: 258 },
+      { name: '玻璃门', number: 259 },
+      { name: '玻璃墙', number: 260 },
+      { name: '钢地板', number: 261 },
+      { name: '钢门', number: 262 },
+      { name: '钢墙', number: 263 },
+      { name: '皇家地板', number: 264 },
+      { name: '皇家门', number: 265 },
+      { name: '皇家墙', number: 266 },
+      { name: '塑料地板', number: 267 },
+      { name: '塑料门', number: 268 },
+      { name: '塑料墙', number: 269 },
+      { name: '电子地板', number: 270 },
+      { name: '电子门', number: 271 },
+      { name: '电子墙', number: 272 },
+      { name: '虚空地板', number: 273 },
+      { name: '虚空门', number: 274 },
+      { name: '虚空墙', number: 275 },
+      { name: '宇宙地板', number: 276 },
+      { name: '宇宙门', number: 277 },
+      { name: '宇宙墙', number: 278 },
+      { name: '锤子', number: 279 },
+      { name: '钓鱼竿', number: 280 },
+      { name: '虚空镐（等级7）', number: 281 },
+      { name: '宇宙镐（等级8）', number: 282 },
+      { name: '虚空剑（等级6）', number: 283 },
+      { name: '宇宙剑（等级7）', number: 284 },
+      { name: '恶魔弓（等级5）', number: 285 },
+      { name: '虚空弓（等级6）', number: 286 },
+      { name: '宇宙弓（等级7）', number: 287 },
+      { name: '虚空钱包（等级7）', number: 288 },
+      { name: '宇宙钱包（等级8）', number: 289 },
+      { name: '恶魔手套（等级5）', number: 290 },
+      { name: '虚空手套（等级6）', number: 291 },
+      { name: '宇宙手套（等级7）', number: 292 },
+      { name: '恶魔靴子（等级5）', number: 293 },
+      { name: '虚空靴子（等级6）', number: 294 },
+      { name: '宇宙靴子（等级7）', number: 295 },
+      { name: '虚空指引（等级6）', number: 296 },
+      { name: '巨著（等级7）', number: 297 },
+      { name: '虚空护身符（等级6）', number: 298 },
+      { name: '宇宙护身符（等级7）', number: 299 },
+      { name: '鱼网', number: 300 },
+      { name: '商人奖章', number: 301 },
+      { name: '月亮奖章', number: 302 },
+      { name: '核镐', number: 303 },
+      { name: '核剑', number: 304 },
+      { name: '核弓', number: 305 },
+      { name: '核钱包', number: 306 },
+      { name: '核手套', number: 307 },
+      { name: '核靴子', number: 308 },
+      { name: '核法典', number: 309 },
+      { name: '核护身符', number: 310 },
+      { name: '铀', number: 311 },
+      { name: '有毒污泥', number: 312 },
+      { name: '玛瑙遗物', number: 313 },
+      { name: '核燃料电池', number: 314 },
+      { name: '核机械', number: 315 },
+      { name: '原子弹', number: 316 },
+      { name: '有毒印章', number: 317 },
+      { name: '花种子', number: 318 }
+    ];
+    const itemList = document.getElementById('itemList');
+    const searchBox = document.getElementById('searchBox');
+    function renderItems(filterText = '') {
+      itemList.innerHTML = '';
+      const lowerFilter = filterText.toLowerCase();
+      items.forEach(item => {
+        if (!filterText || item.name.toLowerCase().includes(lowerFilter)) {
+          const div = document.createElement('div');
+          div.className = 'item';
+          div.innerHTML = `<span class="item-name">${item.name}</span><span class="item-number">${item.number}</span>`;
+          itemList.appendChild(div);
+        }
+      });
+    }
+    searchBox.addEventListener('input', e => renderItems(e.target.value));
+    renderItems();
+  </script>
+</body>
+</html>
